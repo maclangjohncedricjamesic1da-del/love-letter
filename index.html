@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Letter Envelope</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ffc0cb 0%, #e6d4f0 50%, #dda0dd 100%);
+            font-family: 'Georgia', serif;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 500px;
+            height: 400px;
+            perspective: 1000px;
+        }
+
+        /* ENVELOPE STYLES */
+        .envelope {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffe4e1 0%, #f0e6fa 100%);
+            border: 4px solid #dda0dd;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .envelope.opened {
+            transform: translateY(-500px) rotateX(20deg) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ENVELOPE BODY */
+        .envelope-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ENVELOPE FLAP */
+        .flap {
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            width: calc(100% + 8px);
+            height: 55%;
+            background: linear-gradient(180deg, #e0c8f0 0%, #f0d9e8 100%);
+            border: 4px solid #dda0dd;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            transform-origin: top center;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.5), 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 15px;
+            z-index: 30;
+        }
+
+        .envelope.opened .flap {
+            transform: rotateX(-180deg);
+        }
+
+        /* SEAL */
+        .seal {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #ff85c0, #ff1493);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.5);
+            animation: sealGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes sealGlow {
+            0%, 100% { box-shadow: 0 4px 15px rgba(255, 20, 147, 0.5); }
+            50% { box-shadow: 0 8px 25px rgba(255, 20, 147, 0.8); }
+        }
+
+        /* ENVELOPE FRONT CONTENT */
+        .envelope-front-content {
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .envelope-front-content h2 {
+            color: #d946a6;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .envelope-front-content p {
+            color: #9d4edd;
+            font-size: 1.1em;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .envelope-front-content small {
+            color: #c77dba;
+            display: block;
+            font-size: 0.95em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* LETTER STYLES */
+        .letter {
+            position: absolute;
+            width: 85%;
+            height: 90%;
+            background: linear-gradient(135deg, rgba(255, 240, 245, 0.99) 0%, rgba(248, 232, 245, 0.99) 100%);
+            border: 2px solid #dda0dd;
+            border-radius: 10px;
+            padding: 40px 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            transform: scale(0.8) translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s;
+            z-index: 5;
+        }
+
+        .letter.show {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* LETTER CONTENT */
+        .letter-header {
+            color: #d946a6;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .letter-date {
+            color: #9d4edd;
+            text-align: right;
+            font-style: italic;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }
+
+        .letter-body {
+            color: #4a3f5f;
+            line-height: 1.8;
+            font-size: 1.05em;
+            text-align: justify;
+        }
+
+        .letter-body p {
+            margin-bottom: 18px;
+        }
+
+        .letter-body p:first-child {
+            font-weight: bold;
+            color: #d946a6;
+        }
+
+        .letter-signature {
+            text-align: right;
+            margin-top: 30px;
+            color: #d946a6;
+            font-style: italic;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* SCROLLBAR STYLING */
+        .letter::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .letter::-webkit-scrollbar-track {
+            background: rgba(221, 160, 221, 0.1);
+            border-radius: 10px;
+        }
+
+        .letter::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ffc0cb, #dda0dd);
+            border-radius: 10px;
+        }
+
+        .letter::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff69b4, #d946a6);
+        }
+
+        /* BUTTONS */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.4);
+            display: none;
+        }
+
+        .btn.show {
+            display: block;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(255, 20, 147, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, #dda0dd, #9d4edd);
+        }
+
+        /* MUSIC CONTROLS */
+        .music-controls {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 192, 203, 0.95);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            border: 2px solid #dda0dd;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .music-label {
+            color: #9d4edd;
+            font-weight: bold;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+
+        .music-controls button {
+            background: linear-gradient(135deg, #ffc0cb, #dda0dd);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .music-controls button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                max-width: 400px;
+                height: 350px;
+            }
+
+            .letter {
+                width: 90%;
+                padding: 30px 20px;
+            }
+
+            .envelope-front-content h2 {
+                font-size: 1.6em;
+            }
+
+            .letter-header {
+                font-size: 1.5em;
+            }
+
+            .letter-body {
+                font-size: 0.95em;
+            }
+
+            .music-controls {
+                top: 15px;
+                right: 15px;
+                padding: 8px 12px;
+            }
+
+            .music-label {
+                font-size: 0.85em;
+            }
+
+            .music-controls button {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            .controls {
+                bottom: 20px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- MUSIC CONTROLS -->
+    <div class="music-controls">
+        <span class="music-label">🎵</span>
+        <button id="playBtn">Play</button>
+        <button id="pauseBtn">Pause</button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- ENVELOPE -->
+        <div class="envelope" id="envelope">
+            <div class="envelope-body">
+                <!-- FLAP -->
+                <div class="flap">
+                    <div class="seal">💌</div>
+                </div>
+
+                <!-- FRONT CONTENT -->
+                <div class="envelope-front-content">
+                    <h2>✨ For You ✨</h2>
+                    <p>A Love Letter</p>
+                    <small>💗 Click to open 💗</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- LETTER -->
+        <div class="letter" id="letter">
+            <div class="letter-header">💗 A Love Letter 💗</div>
+            <div class="letter-date">September 12, 2026</div>
+            
+            <div class="letter-body">
+                <p>My Dearest,</p>
+                
+                <p>From the moment you entered my life, everything changed. Like the gentle melody of "Glue" by beabadoobee that plays softly in the background, you've become the soundtrack to my days—constant, comforting, and infinitely beautiful.</p>
+                
+                <p>Your presence is like pink petals and lavender dreams—soft, delicate, and absolutely enchanting. Every moment with you feels like a work of art painted in the colors of my heart. You bring warmth to my coldest days and light to my darkest nights.</p>
+                
+                <p>I find myself drawn to you like a moth to a flame, yet with a gentleness that surpasses all understanding. In your eyes, I see a future full of love, laughter, and endless possibilities. You're not just someone I love; you're my greatest adventure, my safest place, my home.</p>
+                
+                <p>Every smile you give me is a gift I treasure. Every laugh we share echoes in my heart long after the moment passes. You've taught me what it means to love completely and unconditionally, without holding back.</p>
+                
+                <p>In the quiet moments, when it's just us, I feel at peace. With you, I don't have to be anyone other than myself. You've seen all my flaws and loved me anyway. That's a kind of magic I never thought existed.</p>
+                
+                <p>Thank you for being you. Thank you for loving me back. Thank you for making every ordinary moment feel extraordinary. With you, I've discovered what it truly means to be completely and utterly in love.</p>
+                
+                <p>Forever yours, wrapped in love and lavender dreams.</p>
+                
+                <div class="letter-signature">
+                    With all my love,<br>
+                    💕 Your admirer 💕
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <button class="btn btn-close" id="closeBtn">💌 Close Letter</button>
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const envelope = document.getElementById('envelope');
+        const letter = document.getElementById('letter');
+        const closeBtn = document.getElementById('closeBtn');
+        const audio = document.getElementById('bgMusic');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        let isOpened = false;
+
+        // OPEN ENVELOPE
+        envelope.addEventListener('click', openEnvelope);
+
+        function openEnvelope() {
+            if (isOpened) return;
+            isOpened = true;
+            
+            envelope.classList.add('opened');
+            letter.classList.add('show');
+            closeBtn.classList.add('show');
+            
+            // Play music when opening
+            audio.play().catch(e => console.log('Auto-play prevented'));
+        }
+
+        // CLOSE ENVELOPE
+        closeBtn.addEventListener('click', closeEnvelope);
+
+        function closeEnvelope() {
+            if (!isOpened) return;
+            isOpened = false;
+            
+            envelope.classList.remove('opened');
+            letter.classList.remove('show');
+            closeBtn.classList.remove('show');
+        }
+
+        // MUSIC CONTROLS
+        playBtn.addEventListener('click', () => {
+            audio.play().catch(e => console.log('Playback prevented'));
+            playBtn.style.opacity = '0.6';
+            pauseBtn.style.opacity = '1';
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            audio.pause();
+            playBtn.style.opacity = '1';
+            pauseBtn.style.opacity = '0.6';
+        });
+
+        // KEYBOARD SHORTCUT
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isOpened) {
+                closeEnvelope();
+            }
+        });
+
+        // Initialize button visibility
+        playBtn.style.opacity = '1';
+        pauseBtn.style.opacity = '0.6';
+    </script>
+</body>
+</html>
